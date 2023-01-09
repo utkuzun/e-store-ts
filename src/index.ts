@@ -1,6 +1,5 @@
 import app from './app';
-
-const PORT = 5000;
+import { PORT } from './utils/config';
 
 const start = () => {
   app.listen(PORT, () => {
