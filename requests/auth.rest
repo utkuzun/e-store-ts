@@ -1,0 +1,10 @@
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+    "name" : "utku",
+    "password" : "supret",
+    "email" : "utku@foo.com",
+    "role": "ADMIN"
+}
+
