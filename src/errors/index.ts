@@ -1,3 +1,3 @@
-import CustomApiError from './CustomApiError';
+import BadRequestError from './BadRequestError';
 
-export default { CustomApiError };
+export default { BadRequestError };
