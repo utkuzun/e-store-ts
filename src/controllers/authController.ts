@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import prisma from '../db/prismaClient';
+// import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
-// import User from '../models/User';
+import User from '../models/User';
 import userSchema from '../schemas/userSchema';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
@@ -9,7 +9,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
   const { email, password, name } = userData;
 
-  const userExists = await prisma.user.findFirst({
+  const userExists = await User.findFirst({
     where: { email: email },
   });
 
@@ -19,9 +19,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     );
   }
 
-  const userAdded = await prisma.user.create({
+  const userAdded = await User.create({
     data: { name, password, email },
   });
+
   res.json({ user: userAdded });
   return;
 };

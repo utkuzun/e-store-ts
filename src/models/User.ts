@@ -1,16 +1,20 @@
-// import prisma from '../db/prismaClient';
-// import { PrismaClient } from '@prisma/client';
-// import userSchema, { UserValidation } from '../schemas/userSchema';
+import prisma from '../db/prismaClient';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
-// const Users = (prismaUser: PrismaClient['user']) => {
-//   return Object.assign(prismaUser, {
-//     validate(userData: unknown): UserValidation {
-//       const result = userSchema.parse(userData);
-//       return result;
-//     },
-//   });
-// };
+const Users = (prismaUser: PrismaClient['user']) => {
+  return Object.assign(prismaUser, {
+    async verifyPassword(password: string, id: number): Promise<boolean> {
+      const user = await prismaUser.findFirst({ where: { id } });
+      if (!user) {
+        return false;
+      }
+      const match = await bcrypt.compare(password, user.password);
+      return match;
+    },
+  });
+};
 
-// const User = Users(prisma.user);
+const User = Users(prisma.user);
 
-// export default User;
+export default User;
