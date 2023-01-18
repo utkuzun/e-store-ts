@@ -1,4 +1,5 @@
 import { ErrorRequestHandler } from 'express';
+import BadRequestError from '../errors/BadRequestError';
 
 interface CustomError {
   message: string;
@@ -6,11 +7,14 @@ interface CustomError {
 }
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   const customError: CustomError = {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    message: err.message || 'Internal Server Error',
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    statusCode: err.statusCode || 500,
+    message: 'Internal Server Error',
+    statusCode: 500,
   };
+
+  if (err instanceof BadRequestError) {
+    customError.message = err.message;
+    customError.statusCode = err.statusCode;
+  }
 
   res.status(customError.statusCode).json({ message: customError.message });
 };
