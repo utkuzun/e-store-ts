@@ -7,8 +7,10 @@ import userSchema from '../schemas/userSchema';
 export const register = async (req: Request, res: Response): Promise<void> => {
   const userData = userSchema.parse(req.body);
 
+  const { email, password, name } = userData;
+
   const userExists = await prisma.user.findFirst({
-    where: { email: userData.email },
+    where: { email: email },
   });
 
   if (userExists) {
@@ -17,7 +19,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     );
   }
 
-  const userAdded = await prisma.user.create({ data: userData });
+  const userAdded = await prisma.user.create({
+    data: { name, password, email },
+  });
   res.json({ user: userAdded });
   return;
 };
