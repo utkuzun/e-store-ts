@@ -21,3 +21,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   res.json({ user: userAdded });
   return;
 };
+
+export const login = (_req: Request, res: Response) => {
+  res.send('login route');
+  return;
+};
+
+export const logout = (_req: Request, res: Response) => {
+  res.send('logout route');
+  return;
+};

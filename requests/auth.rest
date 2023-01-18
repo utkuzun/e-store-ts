@@ -1,10 +1,17 @@
-POST http://localhost:5000/auth/register
+POST http://localhost:5000/api/v1/auth/register
 Content-Type: application/json
 
 {
-    "name" : "utku",
-    "password" : "supret",
+    "name" : "u",
+    "password" : "su",
     "email" : "utku4@foo.com",
-    "role": "ADMIN"
+    "role": "ADM"
 }
+
+###
+POST http://localhost:5000/api/v1/auth/login
+
+###
+GET http://localhost:5000/api/v1/auth/logout
+
 

@@ -16,7 +16,7 @@ app.get('/ping', (_req, res) => {
   res.send('pong');
 });
 
-app.use('/auth', authRouter);
+app.use('/api/v1/auth', authRouter);
 
 app.use(notFound);
 app.use(errorHandler);
