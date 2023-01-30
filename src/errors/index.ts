@@ -1,3 +1,4 @@
 import BadRequestError from './BadRequestError';
+import NotFoundError from './NotFoundError';
 
-export default { BadRequestError };
+export default { BadRequestError, NotFoundError };
