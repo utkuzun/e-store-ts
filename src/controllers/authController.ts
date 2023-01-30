@@ -1,8 +1,11 @@
+import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 // import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
 import User from '../models/User';
 import userSchema, { userLoginSchema } from '../schemas/userSchema';
+import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
+import { StatusCodes } from 'http-status-codes';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   const userData = userSchema.parse(req.body);
@@ -37,7 +40,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 
   const userExists = await User.findFirst({ where: { email: email } });
-  console.log(userExists);
 
   if (!userExists) {
     throw new CustomError.NotFoundError("This user doesn't exists!!");
@@ -49,7 +51,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     throw new CustomError.NotFoundError('Invalid creadentials!!');
   }
 
-  res.send('login route');
+  if (!JWT_SECRET) throw new Error('Login not working!!');
+
+  const token = jwt.sign(
+    { userId: userExists.id, name: userExists.name },
+    JWT_SECRET,
+    { expiresIn: JWT_LIFETIME }
+  );
+
+  res
+    .status(StatusCodes.OK)
+    .json({ token, name: userExists.name, id: userExists.id });
   return;
 };
 
