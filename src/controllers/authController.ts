@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 // import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
 import User from '../models/User';
-import userSchema from '../schemas/userSchema';
+import userSchema, { userLoginSchema } from '../schemas/userSchema';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   const userData = userSchema.parse(req.body);
@@ -27,7 +27,28 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   return;
 };
 
-export const login = (_req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const loginData = userLoginSchema.parse(req.body);
+
+  const { email, password } = loginData;
+
+  if (!email || !password) {
+    throw new CustomError.BadRequestError('Provide email and password plase!!');
+  }
+
+  const userExists = await User.findFirst({ where: { email: email } });
+  console.log(userExists);
+
+  if (!userExists) {
+    throw new CustomError.NotFoundError("This user doesn't exists!!");
+  }
+
+  const match = await User.verifyPassword(password, userExists.id);
+
+  if (!match) {
+    throw new CustomError.NotFoundError('Invalid creadentials!!');
+  }
+
   res.send('login route');
   return;
 };
