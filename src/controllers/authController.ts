@@ -53,16 +53,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
   if (!JWT_SECRET) throw new Error('Login not working!!');
 
-  const tokenPayload = { userId: userExists.id, name: userExists.name };
+  const tokenPayload = {
+    userId: userExists.id,
+    name: userExists.name,
+    role: userExists.role,
+  };
 
   const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
 
   res
     .cookie('userToken', token, {
-      expires: new Date(Date.now() + 15 * 60 * 1000),
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      signed: true,
     })
     .status(StatusCodes.OK)
-    .json(tokenPayload);
+    .end();
   return;
 };
 

@@ -8,11 +8,12 @@ import notFound from './middleware/notFound';
 import errorHandler from './middleware/errorHandler';
 
 import authRouter from './routes/authRoute';
+import { JWT_SECRET } from './utils/config';
 
 const app = express();
 
-app.use(cookieParser());
 app.use(express.json());
+app.use(cookieParser(JWT_SECRET));
 app.use(morgan);
 
 app.get('/ping', (_req, res) => {
