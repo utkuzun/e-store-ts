@@ -3,12 +3,16 @@ import { Request, Response } from 'express';
 // import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
 import User from '../models/User';
-import userSchema, { userLoginSchema } from '../schemas/userSchema';
+import {
+  publicUserSchema,
+  userLoginSchema,
+  userValidationSchema,
+} from '../schemas/userSchema';
 import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 import { StatusCodes } from 'http-status-codes';
 
 export const register = async (req: Request, res: Response) => {
-  const userData = userSchema.parse(req.body);
+  const userData = userValidationSchema.parse(req.body);
 
   const { email, password, name } = userData;
 
@@ -26,7 +30,7 @@ export const register = async (req: Request, res: Response) => {
     data: { name, password, email },
   });
 
-  res.json({ user: userAdded });
+  res.json(publicUserSchema.parse(userAdded));
   return;
 };
 
