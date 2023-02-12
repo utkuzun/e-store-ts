@@ -1,21 +1,39 @@
 import { Request, RequestHandler, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+
+import CustomError from '../errors/index';
 import User from '../models/User';
-import { publicUserSchema } from '../schemas/userSchema';
+import { publicUserSchema, publicUsersSchema } from '../schemas/userSchema';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
     where: { role: 'USER' },
   });
 
-  const usersPublic = publicUserSchema.parse(users);
+  const usersPublic = publicUsersSchema.parse(users);
 
   res.status(StatusCodes.OK).json(usersPublic);
   return;
 };
 
-export const getSingleUser: RequestHandler = (_req: Request, res: Response) => {
-  res.send('a single user route');
+export const getSingleUser = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new CustomError.BadRequestError('Id needed!!');
+  }
+
+  const user = await User.findFirst({
+    where: {
+      id: Number(id),
+    },
+  });
+
+  if (!user) {
+    throw new CustomError.NotFoundError(`user with id : ${id}  not found!!`);
+  }
+
+  res.status(StatusCodes.OK).json(publicUserSchema.parse(user));
   return;
 };
 
