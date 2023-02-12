@@ -5,6 +5,7 @@ const router = express.Router();
 
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/register').post(register);
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/login').post(login);
 router.route('/logout').get(logout);
 

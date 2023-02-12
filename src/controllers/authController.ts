@@ -7,7 +7,7 @@ import userSchema, { userLoginSchema } from '../schemas/userSchema';
 import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 import { StatusCodes } from 'http-status-codes';
 
-export const register = async (req: Request, res: Response): Promise<void> => {
+export const register = async (req: Request, res: Response) => {
   const userData = userSchema.parse(req.body);
 
   const { email, password, name } = userData;
@@ -30,7 +30,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   return;
 };
 
-export const login = async (req: Request, res: Response): Promise<void> => {
+export const login = async (req: Request, res: Response) => {
   const loginData = userLoginSchema.parse(req.body);
 
   const { email, password } = loginData;
