@@ -1,9 +1,9 @@
-import { UserPublic } from './src/schemas/userSchema';
+import { UserPayload } from './src/schemas/userSchema';
 
 declare global {
   namespace Express {
     interface Request {
-      user: UserPublic;
+      user: UserPayload;
     }
   }
 }

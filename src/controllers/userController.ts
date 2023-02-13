@@ -37,8 +37,11 @@ export const getSingleUser = async (req: Request, res: Response) => {
   return;
 };
 
-export const showCurrentUser = (req: Request, res: Response) => {
-  const user = req.user;
+export const showCurrentUser = async (req: Request, res: Response) => {
+  const { userId: id } = req.user;
+
+  const user = await User.findFirst({ where: { id } });
+
   res.json(user);
   return;
 };

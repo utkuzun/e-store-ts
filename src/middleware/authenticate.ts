@@ -3,14 +3,9 @@ import CustomError from '../errors/';
 import z from 'zod';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../utils/config';
-import User from '../models/User';
-import { publicUserSchema, userTokenPayload } from '../schemas/userSchema';
+import { userTokenPayload } from '../schemas/userSchema';
 
-const authenticate = async (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-) => {
+const authenticate = (req: Request, _res: Response, next: NextFunction) => {
   const userToken = z.string().optional().parse(req.signedCookies.userToken);
 
   if (!userToken) {
@@ -29,13 +24,7 @@ const authenticate = async (
 
   const data = userTokenPayload.parse(userPayload);
 
-  const user = await User.findFirst({ where: { id: data.userId } });
-
-  if (!user) {
-    throw new CustomError.NotFoundError('Please register!!');
-  }
-
-  req.user = publicUserSchema.parse(user);
+  req.user = data;
 
   next();
 };
