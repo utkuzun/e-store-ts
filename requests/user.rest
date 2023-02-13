@@ -4,4 +4,7 @@
 GET {{base_url}}/
 
 ###
-POST {{base_url}}/10
+GET {{base_url}}/14
+
+###
+GEt {{base_url}}/currentUser

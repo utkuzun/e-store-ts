@@ -37,11 +37,9 @@ export const getSingleUser = async (req: Request, res: Response) => {
   return;
 };
 
-export const showCurrentUser: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('current user route');
+export const showCurrentUser = (req: Request, res: Response) => {
+  const user = req.user;
+  res.json(user);
   return;
 };
 
