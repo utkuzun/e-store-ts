@@ -6,6 +6,7 @@ import User from '../models/User';
 import {
   publicUserSchema,
   userLoginSchema,
+  UserPayload,
   userValidationSchema,
 } from '../schemas/userSchema';
 import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
@@ -57,7 +58,7 @@ export const login = async (req: Request, res: Response) => {
 
   if (!JWT_SECRET) throw new Error('Login not working!!');
 
-  const tokenPayload = {
+  const tokenPayload: UserPayload = {
     userId: userExists.id,
     name: userExists.name,
     role: userExists.role,

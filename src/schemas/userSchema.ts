@@ -16,4 +16,13 @@ export const userLoginSchema = userSchema.pick({ email: true, password: true });
 export const publicUserSchema = userSchema.omit({ password: true });
 export const publicUsersSchema = publicUserSchema.array();
 
+export const userTokenPayload = z.object({
+  userId: z.number(),
+  name: z.string(),
+  role: z.string(),
+});
+
+export type UserPayload = z.infer<typeof userTokenPayload>;
+export type UserPublic = z.infer<typeof publicUserSchema>;
+
 export default userSchema;
