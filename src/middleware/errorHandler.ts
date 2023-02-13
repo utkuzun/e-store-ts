@@ -1,5 +1,6 @@
 import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
+import AuthenticationError from '../errors/AuthenticationError';
 import BadRequestError from '../errors/BadRequestError';
 import NotFoundError from '../errors/NotFoundError';
 
@@ -7,13 +8,24 @@ interface CustomError {
   message: string;
   statusCode: number;
 }
+
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   const customError: CustomError = {
     message: 'Internal Server Error',
     statusCode: 500,
   };
 
-  if (err instanceof BadRequestError || err instanceof NotFoundError) {
+  if (err instanceof BadRequestError) {
+    customError.message = err.message;
+    customError.statusCode = err.statusCode;
+  }
+
+  if (err instanceof AuthenticationError) {
+    customError.message = err.message;
+    customError.statusCode = err.statusCode;
+  }
+
+  if (err instanceof NotFoundError) {
     customError.message = err.message;
     customError.statusCode = err.statusCode;
   }
