@@ -3,6 +3,7 @@ import {
   getAllUsers,
   getSingleUser,
   showCurrentUser,
+  updateUserPassword,
 } from '../controllers/userController';
 
 import authenticate from '../middleware/authenticate';
@@ -15,5 +16,6 @@ router.route('/').get(authenticate, getAllUsers);
 router.route('/currentUser').get(authenticate, showCurrentUser);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/:id').get(getSingleUser);
+router.route('/updatePassword').patch(authenticate, updateUserPassword);
 
 export default router;

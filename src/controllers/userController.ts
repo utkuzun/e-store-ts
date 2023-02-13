@@ -1,9 +1,14 @@
 import { Request, RequestHandler, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcrypt';
 
 import CustomError from '../errors/index';
 import User from '../models/User';
-import { publicUserSchema, publicUsersSchema } from '../schemas/userSchema';
+import {
+  publicUserSchema,
+  publicUsersSchema,
+  userPasswordBody,
+} from '../schemas/userSchema';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
@@ -42,7 +47,7 @@ export const showCurrentUser = async (req: Request, res: Response) => {
 
   const user = await User.findFirst({ where: { id } });
 
-  res.json(user);
+  res.json(publicUserSchema.parse(user));
   return;
 };
 
@@ -51,10 +56,34 @@ export const updateUser: RequestHandler = (_req: Request, res: Response) => {
   return;
 };
 
-export const updateUserPassword: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('update password root');
+export const updateUserPassword = async (req: Request, res: Response) => {
+  const { userId: id } = req.user;
+
+  const { newPassword, oldPassword } = userPasswordBody.parse(req.body);
+
+  if (!oldPassword || !newPassword) {
+    throw new CustomError.BadRequestError(
+      'Please provide an old and a new password'
+    );
+  }
+
+  const user = await User.findFirst({ where: { id } });
+
+  if (!user) {
+    throw new CustomError.NotFoundError('User not found!!');
+  }
+
+  const match = await bcrypt.compare(oldPassword, user.password);
+
+  if (!match) {
+    throw new CustomError.AuthenticationError('Invalid credentials');
+  }
+
+  const userUpdated = await User.update({
+    where: { id },
+    data: { password: newPassword },
+  });
+
+  res.status(StatusCodes.OK).json(publicUserSchema.parse(userUpdated));
   return;
 };

@@ -3,7 +3,10 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 prisma.$use(async (params, next) => {
-  if (params.action == 'create' && params.model == 'User') {
+  if (
+    (params.action == 'create' || params.action == 'update') &&
+    params.model == 'User'
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user = params.args.data;
 

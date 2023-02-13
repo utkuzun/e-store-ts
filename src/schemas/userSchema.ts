@@ -8,8 +8,6 @@ const userSchema = z.object({
   role: z.enum(['USER', 'ADMIN']),
 });
 
-export type UserValidation = z.infer<typeof userSchema>;
-
 export const userValidationSchema = userSchema.omit({ id: true });
 export const userLoginSchema = userSchema.pick({ email: true, password: true });
 
@@ -22,6 +20,12 @@ export const userTokenPayload = z.object({
   role: z.string(),
 });
 
+export const userPasswordBody = z.object({
+  oldPassword: z.string(),
+  newPassword: z.string().min(6),
+});
+
+export type UserValidation = z.infer<typeof userSchema>;
 export type UserPayload = z.infer<typeof userTokenPayload>;
 export type UserPublic = z.infer<typeof publicUserSchema>;
 
