@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 import CustomError from '../errors/';
 import z from 'zod';
-import { verifyUserToken } from '../utils/userToken';
+import { verifyToken } from '../utils/userToken';
+import { userTokenPayload } from '../schemas/userSchema';
 
 const authenticate = (req: Request, _res: Response, next: NextFunction) => {
   const userToken = z.string().optional().parse(req.signedCookies.userToken);
@@ -10,8 +11,9 @@ const authenticate = (req: Request, _res: Response, next: NextFunction) => {
     throw new CustomError.AuthenticationError('Not logged in!!');
   }
 
-  const data = verifyUserToken(userToken);
+  const userPayload = verifyToken(userToken);
 
+  const data = userTokenPayload.parse(userPayload);
   req.user = data;
 
   next();
