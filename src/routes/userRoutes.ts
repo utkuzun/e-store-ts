@@ -3,6 +3,7 @@ import {
   getAllUsers,
   getSingleUser,
   showCurrentUser,
+  updateUser,
   updateUserPassword,
 } from '../controllers/userController';
 
@@ -15,7 +16,8 @@ router.route('/').get(authenticate, getAllUsers);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/currentUser').get(authenticate, showCurrentUser);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/:id').get(getSingleUser);
+router.route('/:id').get(getSingleUser).patch(authenticate, updateUser);
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/updatePassword').patch(authenticate, updateUserPassword);
 
 export default router;

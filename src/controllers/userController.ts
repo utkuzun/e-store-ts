@@ -1,6 +1,9 @@
-import { Request, RequestHandler, Response } from 'express';
+import { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
+
 import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcrypt';
+import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 
 import CustomError from '../errors/index';
 import User from '../models/User';
@@ -8,6 +11,8 @@ import {
   publicUserSchema,
   publicUsersSchema,
   userPasswordBody,
+  UserPayload,
+  userUpdateBody,
 } from '../schemas/userSchema';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
@@ -51,8 +56,34 @@ export const showCurrentUser = async (req: Request, res: Response) => {
   return;
 };
 
-export const updateUser: RequestHandler = (_req: Request, res: Response) => {
-  res.send('update user route');
+export const updateUser = async (req: Request, res: Response) => {
+  const { name, email } = userUpdateBody.parse(req.body);
+  const { userId: id } = req.user;
+
+  if (!name || !email) {
+    throw new CustomError.BadRequestError('Please provide name and email!!');
+  }
+
+  const user = await User.update({ where: { id }, data: { name, email } });
+
+  const tokenPayload: UserPayload = {
+    userId: user.id,
+    name: user.name,
+    role: user.role,
+  };
+
+  if (!JWT_SECRET) throw new Error('Login not working!!');
+
+  const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
+
+  res
+    .cookie('userToken', token, {
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      httpOnly: true,
+      signed: true,
+    })
+    .status(StatusCodes.OK)
+    .end();
   return;
 };
 

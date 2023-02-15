@@ -25,6 +25,11 @@ export const userPasswordBody = z.object({
   newPassword: z.string().min(6),
 });
 
+export const userUpdateBody = z.object({
+  name: z.string().min(3).max(50),
+  email: z.string().email(),
+});
+
 export type UserValidation = z.infer<typeof userSchema>;
 export type UserPayload = z.infer<typeof userTokenPayload>;
 export type UserPublic = z.infer<typeof publicUserSchema>;

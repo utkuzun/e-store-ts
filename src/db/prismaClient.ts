@@ -8,6 +8,13 @@ prisma.$use(async (params, next) => {
     params.model == 'User'
   ) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { password } = params.args.data;
+
+    if (!password) {
+      return next(params);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const user = params.args.data;
 
     const saltRounds = 10;
