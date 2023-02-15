@@ -5,7 +5,7 @@ import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 import CustomError from '../errors/';
 import { userTokenPayload } from '../schemas/userSchema';
 
-const createUserPayload = (user: User): UserPayload => {
+export const createUserPayload = (user: User): UserPayload => {
   return {
     userId: user.id,
     name: user.name,
@@ -13,12 +13,10 @@ const createUserPayload = (user: User): UserPayload => {
   };
 };
 
-export const createUserToken = (user: User) => {
-  const tokenPayload = createUserPayload(user);
-
+export const createToken = (payload: object) => {
   if (!JWT_SECRET) throw new Error('Login not working!!');
 
-  const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
 
   return token;
 };

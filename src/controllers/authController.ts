@@ -8,7 +8,7 @@ import {
   userValidationSchema,
 } from '../schemas/userSchema';
 import { StatusCodes } from 'http-status-codes';
-import { createUserToken } from '../utils/userToken';
+import { createToken, createUserPayload } from '../utils/userToken';
 
 export const register = async (req: Request, res: Response) => {
   const userData = userValidationSchema.parse(req.body);
@@ -54,7 +54,8 @@ export const login = async (req: Request, res: Response) => {
     throw new CustomError.NotFoundError('Invalid creadentials!!');
   }
 
-  const token = createUserToken(userExists);
+  const tokenPayload = createUserPayload(userExists);
+  const token = createToken(tokenPayload);
 
   res
     .cookie('userToken', token, {

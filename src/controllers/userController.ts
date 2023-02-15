@@ -11,7 +11,7 @@ import {
   userPasswordBody,
   userUpdateBody,
 } from '../schemas/userSchema';
-import { createUserToken } from '../utils/userToken';
+import { createUserPayload, createToken } from '../utils/userToken';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
@@ -64,7 +64,9 @@ export const updateUser = async (req: Request, res: Response) => {
 
   const user = await User.update({ where: { id }, data: { name, email } });
 
-  const token = createUserToken(user);
+  const tokenPayload = createUserPayload(user);
+
+  const token = createToken(tokenPayload);
 
   res
     .cookie('userToken', token, {
