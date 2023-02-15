@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 // import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
@@ -6,11 +5,10 @@ import User from '../models/User';
 import {
   publicUserSchema,
   userLoginSchema,
-  UserPayload,
   userValidationSchema,
 } from '../schemas/userSchema';
-import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 import { StatusCodes } from 'http-status-codes';
+import { createUserToken } from '../utils/userToken';
 
 export const register = async (req: Request, res: Response) => {
   const userData = userValidationSchema.parse(req.body);
@@ -56,15 +54,7 @@ export const login = async (req: Request, res: Response) => {
     throw new CustomError.NotFoundError('Invalid creadentials!!');
   }
 
-  if (!JWT_SECRET) throw new Error('Login not working!!');
-
-  const tokenPayload: UserPayload = {
-    userId: userExists.id,
-    name: userExists.name,
-    role: userExists.role,
-  };
-
-  const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
+  const token = createUserToken(userExists);
 
   res
     .cookie('userToken', token, {

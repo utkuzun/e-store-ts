@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
 
 import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcrypt';
-import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 
 import CustomError from '../errors/index';
 import User from '../models/User';
@@ -11,9 +9,9 @@ import {
   publicUserSchema,
   publicUsersSchema,
   userPasswordBody,
-  UserPayload,
   userUpdateBody,
 } from '../schemas/userSchema';
+import { createUserToken } from '../utils/userToken';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
@@ -66,15 +64,7 @@ export const updateUser = async (req: Request, res: Response) => {
 
   const user = await User.update({ where: { id }, data: { name, email } });
 
-  const tokenPayload: UserPayload = {
-    userId: user.id,
-    name: user.name,
-    role: user.role,
-  };
-
-  if (!JWT_SECRET) throw new Error('Login not working!!');
-
-  const token = jwt.sign(tokenPayload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
+  const token = createUserToken(user);
 
   res
     .cookie('userToken', token, {
