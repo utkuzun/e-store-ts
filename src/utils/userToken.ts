@@ -1,4 +1,6 @@
 import jwt from 'jsonwebtoken';
+import { Response } from 'express';
+
 import { UserPayload } from '../schemas/userSchema';
 import { User } from '@prisma/client';
 import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
@@ -32,4 +34,15 @@ export const verifyToken = (token: string) => {
   }
 
   return payload;
+};
+
+export const attachCookiesToResponse = (res: Response, payload: object) => {
+  const token = createToken(payload);
+  res.cookie('userToken', token, {
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    signed: true,
+  });
+
+  return;
 };

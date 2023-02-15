@@ -11,7 +11,7 @@ import {
   userPasswordBody,
   userUpdateBody,
 } from '../schemas/userSchema';
-import { createUserPayload, createToken } from '../utils/userToken';
+import { createUserPayload, attachCookiesToResponse } from '../utils/userToken';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
@@ -64,18 +64,11 @@ export const updateUser = async (req: Request, res: Response) => {
 
   const user = await User.update({ where: { id }, data: { name, email } });
 
-  const tokenPayload = createUserPayload(user);
+  const userPayload = createUserPayload(user);
 
-  const token = createToken(tokenPayload);
+  attachCookiesToResponse(res, userPayload);
 
-  res
-    .cookie('userToken', token, {
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      httpOnly: true,
-      signed: true,
-    })
-    .status(StatusCodes.OK)
-    .end();
+  res.status(StatusCodes.OK).end();
   return;
 };
 

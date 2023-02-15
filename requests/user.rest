@@ -23,6 +23,6 @@ PATCH {{base_url}}/12
 Content-Type: application/json
 
 {
-    "name" : "mahmut",
+    "name" : "kamil",
     "email" : "utku10@foo.com"
 }
