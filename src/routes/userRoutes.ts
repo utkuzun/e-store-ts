@@ -7,17 +7,21 @@ import {
   updateUserPassword,
 } from '../controllers/userController';
 
-import authenticate from '../middleware/authenticate';
+import authenticate, { addPermission } from '../middleware/authenticate';
 
 const router = express.Router();
 
+router
+  .route('/')
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  .get(authenticate, addPermission(['ADMIN']), getAllUsers);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/').get(authenticate, getAllUsers);
+router.route('/showMe').get(authenticate, showCurrentUser);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/currentUser').get(authenticate, showCurrentUser);
+router.route('/updateUserPassword').patch(authenticate, updateUserPassword);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/updatePassword').patch(authenticate, updateUserPassword);
+router.route('/updateUser').patch(authenticate, updateUser);
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
-router.route('/:id').get(getSingleUser).patch(authenticate, updateUser);
+router.route('/:id').get(getSingleUser);
 
 export default router;

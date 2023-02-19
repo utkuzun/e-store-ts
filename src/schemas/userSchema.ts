@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import z from 'zod';
 
 const userSchema = z.object({
@@ -5,7 +6,7 @@ const userSchema = z.object({
   name: z.string().min(3).max(50),
   password: z.string().min(6),
   email: z.string().email(),
-  role: z.enum(['USER', 'ADMIN']),
+  role: z.nativeEnum(Role),
 });
 
 export const userValidationSchema = userSchema.omit({ id: true });
@@ -17,7 +18,7 @@ export const publicUsersSchema = publicUserSchema.array();
 export const userTokenPayload = z.object({
   userId: z.number(),
   name: z.string(),
-  role: z.string(),
+  role: z.nativeEnum(Role),
 });
 
 export const userPasswordBody = z.object({

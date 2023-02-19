@@ -1,12 +1,11 @@
 import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 
-import { UserPayload } from '../schemas/userSchema';
-import { User } from '@prisma/client';
+import { UserPayload, UserPublic } from '../schemas/userSchema';
 import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
 import CustomError from '../errors/';
 
-export const createUserPayload = (user: User): UserPayload => {
+export const createUserPayload = (user: UserPublic): UserPayload => {
   return {
     userId: user.id,
     name: user.name,

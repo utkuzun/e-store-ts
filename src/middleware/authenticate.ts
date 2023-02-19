@@ -3,6 +3,7 @@ import CustomError from '../errors/';
 import z from 'zod';
 import { verifyToken } from '../utils/userToken';
 import { userTokenPayload } from '../schemas/userSchema';
+import { Role } from '@prisma/client';
 
 const authenticate = (req: Request, _res: Response, next: NextFunction) => {
   const userToken = z.string().optional().parse(req.signedCookies.userToken);
@@ -17,6 +18,16 @@ const authenticate = (req: Request, _res: Response, next: NextFunction) => {
   req.user = data;
 
   next();
+};
+
+export const addPermission = (roles: Role[]) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!roles.includes(req.user.role)) {
+      throw new CustomError.ForbiddenError('Do not have permission!!!');
+    }
+
+    next();
+  };
 };
 
 export default authenticate;

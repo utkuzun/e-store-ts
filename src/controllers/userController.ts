@@ -1,26 +1,19 @@
 import { Request, Response } from 'express';
 
 import { StatusCodes } from 'http-status-codes';
-import bcrypt from 'bcrypt';
 
 import CustomError from '../errors/index';
 import User from '../models/User';
-import {
-  publicUserSchema,
-  publicUsersSchema,
-  userPasswordBody,
-  userUpdateBody,
-} from '../schemas/userSchema';
+import { userPasswordBody, userUpdateBody } from '../schemas/userSchema';
 import { createUserPayload, attachCookiesToResponse } from '../utils/userToken';
 
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await User.findMany({
     where: { role: 'USER' },
+    select: { role: true, email: true, id: true, name: true },
   });
 
-  const usersPublic = publicUsersSchema.parse(users);
-
-  res.status(StatusCodes.OK).json(usersPublic);
+  res.status(StatusCodes.OK).json(users);
   return;
 };
 
@@ -35,22 +28,26 @@ export const getSingleUser = async (req: Request, res: Response) => {
     where: {
       id: Number(id),
     },
+    select: { role: true, email: true, id: true, name: true },
   });
 
   if (!user) {
     throw new CustomError.NotFoundError(`user with id : ${id}  not found!!`);
   }
 
-  res.status(StatusCodes.OK).json(publicUserSchema.parse(user));
+  res.status(StatusCodes.OK).json(user);
   return;
 };
 
 export const showCurrentUser = async (req: Request, res: Response) => {
   const { userId: id } = req.user;
 
-  const user = await User.findFirst({ where: { id } });
+  const user = await User.findFirst({
+    where: { id },
+    select: { role: true, email: true, id: true, name: true },
+  });
 
-  res.json(publicUserSchema.parse(user));
+  res.json(user);
   return;
 };
 
@@ -62,7 +59,11 @@ export const updateUser = async (req: Request, res: Response) => {
     throw new CustomError.BadRequestError('Please provide name and email!!');
   }
 
-  const user = await User.update({ where: { id }, data: { name, email } });
+  const user = await User.update({
+    where: { id },
+    data: { name, email },
+    select: { role: true, email: true, id: true, name: true },
+  });
 
   const userPayload = createUserPayload(user);
 
@@ -83,13 +84,16 @@ export const updateUserPassword = async (req: Request, res: Response) => {
     );
   }
 
-  const user = await User.findFirst({ where: { id } });
+  const user = await User.findFirst({
+    where: { id },
+    select: { role: true, email: true, id: true, name: true },
+  });
 
   if (!user) {
     throw new CustomError.NotFoundError('User not found!!');
   }
 
-  const match = await bcrypt.compare(oldPassword, user.password);
+  const match = await User.verifyPassword(oldPassword, user.id);
 
   if (!match) {
     throw new CustomError.AuthenticationError('Invalid credentials');
@@ -98,8 +102,9 @@ export const updateUserPassword = async (req: Request, res: Response) => {
   const userUpdated = await User.update({
     where: { id },
     data: { password: newPassword },
+    select: { role: true, email: true, id: true, name: true },
   });
 
-  res.status(StatusCodes.OK).json(publicUserSchema.parse(userUpdated));
+  res.status(StatusCodes.OK).json(userUpdated);
   return;
 };
