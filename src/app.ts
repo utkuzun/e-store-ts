@@ -9,6 +9,7 @@ import errorHandler from './middleware/errorHandler';
 
 import authRouter from './routes/authRoute';
 import userRouter from './routes/userRoutes';
+import productRouter from './routes/productRoutes';
 import { JWT_SECRET } from './utils/config';
 
 const app = express();
@@ -23,6 +24,7 @@ app.get('/ping', (_req, res) => {
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/products', productRouter);
 
 app.use(notFound);
 app.use(errorHandler);
