@@ -29,9 +29,9 @@ model Product {
   colors        String[]
   featured      Boolean  @default(false)
   inventory     Int
-  averageRating Float
+  averageRating Float @default(0)
   createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @map("updated_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
   userId        Int      @map("user_id")
   freeShipping  Boolean  @default(false) @map("free_shipping")
   user          User     @relation(fields: [userId], references: [id])
