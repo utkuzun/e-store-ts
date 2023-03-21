@@ -28,7 +28,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
     where: {
       id: Number(id),
     },
-    select: { role: true, email: true, id: true, name: true },
+    select: { role: true, email: true, id: true, name: true, products: true },
   });
 
   if (!user) {
@@ -44,7 +44,13 @@ export const showCurrentUser = async (req: Request, res: Response) => {
 
   const user = await User.findFirst({
     where: { id },
-    select: { role: true, email: true, id: true, name: true },
+    select: {
+      role: true,
+      email: true,
+      id: true,
+      name: true,
+      products: { select: { name: true, id: true, description: true } },
+    },
   });
 
   res.json(user);
