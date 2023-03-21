@@ -27,7 +27,7 @@ Content-Type: application/json
 }
 
 ###
-PATCH  {{base_url}}/
+PATCH  {{base_url}}/3
 Content-Type: application/json
 
 {
