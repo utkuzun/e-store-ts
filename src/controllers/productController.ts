@@ -3,19 +3,19 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
 import { productValidation } from '../schemas/productSchema';
 
-export const getlAllProducts: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('get all products');
+export const getlAllProducts = async (_req: Request, res: Response) => {
+  const products = await prisma.product.findMany({});
+
+  res.status(StatusCodes.OK).json(products);
   return;
 };
 
-export const getSingleProduct: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('get single products');
+export const getSingleProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const product = await prisma.product.findFirst({ where: { id: Number(id) } });
+
+  res.status(StatusCodes.CREATED).json(product);
   return;
 };
 

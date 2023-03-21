@@ -14,6 +14,7 @@ const router = express.Router();
 router
   .route('/')
   .get(getlAllProducts)
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   .post(authenticate, addPermission(['ADMIN']), createProduct);
 
 router
