@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
 import { productValidation } from '../schemas/productSchema';
 
+import CustomError from '../errors/index';
+
 export const getlAllProducts = async (_req: Request, res: Response) => {
   const products = await prisma.product.findMany({});
 
@@ -42,8 +44,20 @@ export const updateProduct: RequestHandler = (_req: Request, res: Response) => {
   return;
 };
 
-export const deleteProduct: RequestHandler = (_req: Request, res: Response) => {
-  res.send('get all products');
+export const deleteProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const product = await prisma.product.findFirst({ where: { id: Number(id) } });
+
+  if (product?.userId !== req.user.userId) {
+    throw new CustomError.AuthenticationError('Not authenticated!!');
+  }
+
+  await prisma.product.delete({
+    where: { id: Number(id) },
+  });
+
+  res.status(StatusCodes.OK).end();
   return;
 };
 
