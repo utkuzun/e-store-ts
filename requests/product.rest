@@ -25,3 +25,13 @@ Content-Type: application/json
     "inventory" : 5,
     "freeShipping" : false
 }
+
+###
+PATCH  {{base_url}}/
+Content-Type: application/json
+
+{
+    "name" : "mocha",
+    "price" : 45,
+    "description" : "nicer dicer product"
+}

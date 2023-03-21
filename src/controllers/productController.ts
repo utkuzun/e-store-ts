@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
-import { productValidation } from '../schemas/productSchema';
+import { productUpdate, productValidation } from '../schemas/productSchema';
 
 import CustomError from '../errors/index';
 
@@ -39,8 +39,17 @@ export const createProduct = async (
   return;
 };
 
-export const updateProduct: RequestHandler = (_req: Request, res: Response) => {
-  res.send('update products');
+export const updateProduct = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const updateProductFields = productUpdate.parse(req.body);
+
+  const productUpdated = await prisma.product.update({
+    where: { id: Number(id) },
+    data: { ...updateProductFields },
+  });
+
+  res.status(StatusCodes.OK).json(productUpdated);
   return;
 };
 
