@@ -1,4 +1,7 @@
 import { Request, Response, RequestHandler } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import prisma from '../db/prismaClient';
+import { productValidation } from '../schemas/productSchema';
 
 export const getlAllProducts: RequestHandler = (
   _req: Request,
@@ -16,8 +19,21 @@ export const getSingleProduct: RequestHandler = (
   return;
 };
 
-export const createProduct: RequestHandler = (_req: Request, res: Response) => {
-  res.send('create products');
+export const createProduct = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const productInput = productValidation.parse(req.body);
+  const { userId } = req.user;
+
+  const product = await prisma.product.create({
+    data: {
+      ...productInput,
+      userId,
+    },
+  });
+
+  res.status(StatusCodes.CREATED).json(product);
   return;
 };
 

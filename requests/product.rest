@@ -2,3 +2,20 @@
 
 ###
 GET {{base_url}}/
+
+###
+POST {{base_url}}/
+Content-Type: application/json
+
+{
+    "name" : "mocha",
+    "price" : 45,
+    "description" : "nice product",
+    "image" : "asdfasfdasdfaf",
+    "category" : "love",
+    "company" : "milk",
+    "colors" : ["yellow", "green"],
+    "featured" : false,
+    "inventory" : 5,
+    "freeShipping" : false
+}
