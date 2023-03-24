@@ -1,6 +1,7 @@
 import express from 'express';
 require('express-async-errors');
 import cookieParser from 'cookie-parser';
+// import fileUpload from 'express-fileupload';
 
 // import prisma from './db/prismaClient';
 import morgan from './middleware/morgan';

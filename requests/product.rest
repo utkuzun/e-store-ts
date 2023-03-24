@@ -35,3 +35,18 @@ Content-Type: application/json
     "price" : 45,
     "description" : "nicer dicer product"
 }
+
+###
+PATCH {{base_url}}/uploadImage
+Content-Type: multipart/form-data; boundary=----KitFormBoundary7MA4YWxkTrZu0gW
+
+------KitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="text"
+
+title
+------KitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="resim.png"
+Content-Type: image/png
+
+< ./resim.png
+------KitFormBoundary7MA4YWxkTrZu0gW--

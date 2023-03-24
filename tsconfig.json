@@ -30,5 +30,5 @@
     // "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
   "include": ["src/**/*"],
-  "files": ["custom.d.ts"]
+  "files": ["custom.d.ts", "cloudinary.d.ts"]
 }

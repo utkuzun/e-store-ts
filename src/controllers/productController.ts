@@ -1,9 +1,14 @@
-import { Request, Response, RequestHandler } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
-import { productUpdate, productValidation } from '../schemas/productSchema';
+import {
+  imageValidation,
+  productUpdate,
+  productValidation,
+} from '../schemas/productSchema';
 
 import CustomError from '../errors/index';
+import cloudinary from '../utils/dataStorage';
 
 export const getlAllProducts = async (_req: Request, res: Response) => {
   const products = await prisma.product.findMany({});
@@ -70,7 +75,15 @@ export const deleteProduct = async (req: Request, res: Response) => {
   return;
 };
 
-export const uploadImage: RequestHandler = (_req: Request, res: Response) => {
-  res.send('upload image to products');
+export const uploadImage = async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw new CustomError.BadRequestError('No files attached!!');
+  }
+
+  imageValidation.parse(req.file);
+  const imageFilePath = req.file.path;
+
+  const result = await cloudinary.uploader.upload(imageFilePath);
+  res.json({ image: result.url });
   return;
 };

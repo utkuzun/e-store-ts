@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import express from 'express';
 import {
   createProduct,
@@ -8,18 +9,23 @@ import {
   uploadImage,
 } from '../controllers/productController';
 import authenticate, { addPermission } from '../middleware/authenticate';
+import { upload } from '../middleware/multer';
 
 const router = express.Router();
 
 router
   .route('/')
   .get(getlAllProducts)
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   .post(authenticate, addPermission(['ADMIN']), createProduct);
 
 router
   .route('/uploadImage')
-  .patch(authenticate, addPermission(['ADMIN']), uploadImage);
+  .patch(
+    authenticate,
+    addPermission(['ADMIN']),
+    upload.single('image'),
+    uploadImage
+  );
 
 router
   .route('/:id')
