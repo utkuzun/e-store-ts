@@ -22,6 +22,10 @@ export const getSingleProduct = async (req: Request, res: Response) => {
 
   const product = await prisma.product.findFirst({ where: { id: Number(id) } });
 
+  if (!product) {
+    throw new CustomError.NotFoundError(`Product with id : ${id} not found!!`);
+  }
+
   res.status(StatusCodes.CREATED).json(product);
   return;
 };
@@ -46,6 +50,12 @@ export const createProduct = async (
 
 export const updateProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
+
+  const product = await prisma.product.findFirst({ where: { id: Number(id) } });
+
+  if (!product) {
+    throw new CustomError.NotFoundError(`Product with id : ${id} not found!!`);
+  }
 
   const updateProductFields = productUpdate.parse(req.body);
 
