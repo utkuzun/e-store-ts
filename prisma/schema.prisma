@@ -21,15 +21,15 @@ model User {
 model Product {
   id            Int      @id @default(autoincrement())
   name          String
-  price         Int
+  price         Int @default(0)
   description   String
   image         String
-  category      String
-  company       String
+  category      Category @default(kitchen)
+  company       Company  @default(ikea)
   colors        String[]
   featured      Boolean  @default(false)
-  inventory     Int
-  averageRating Float @default(0)
+  inventory     Int @default(15)
+  averageRating Float @default(0) @map("average_rating")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
   userId        Int      @map("user_id")
@@ -37,6 +37,18 @@ model Product {
   user          User     @relation(fields: [userId], references: [id])
 
   @@map("products")
+}
+
+enum Category {
+  office
+  kitchen
+  bedroom
+}
+
+enum Company {
+  ikea
+  liddy
+  marcos
 }
 
 enum Role {
