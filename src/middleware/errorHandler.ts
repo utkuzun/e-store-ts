@@ -1,4 +1,6 @@
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { ErrorRequestHandler } from 'express';
+import { StatusCodes } from 'http-status-codes';
 import { ZodError } from 'zod';
 import AuthenticationError from '../errors/AuthenticationError';
 import BadRequestError from '../errors/BadRequestError';
@@ -46,6 +48,13 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
       .join(', ');
     customError.message = validationError;
     customError.statusCode = 400;
+  }
+
+  if (err instanceof PrismaClientKnownRequestError) {
+    const message = err.message.split('failed on the fields')[1];
+
+    customError.message = `database constraints failed. Db response ${message}`;
+    customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
   res.status(customError.statusCode).json({ message: customError.message });
