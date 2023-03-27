@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
 import { reviewValidation } from '../schemas/reviewSchema';
+import CustomError from '../errors/index';
 
 export const createReview = async (req: Request, res: Response) => {
   const reviewInput = await reviewValidation.parseAsync(req.body);
@@ -23,13 +24,31 @@ export const createReview = async (req: Request, res: Response) => {
   return;
 };
 
-export const getAllReviews = (_req: Request, res: Response) => {
-  res.send('get all reviews review');
+export const getAllReviews = async (_req: Request, res: Response) => {
+  const reviews = await prisma.review.findMany({});
+
+  res.status(StatusCodes.OK).json(reviews);
   return;
 };
 
-export const getSingleReview = (_req: Request, res: Response) => {
-  res.send('get single review');
+export const getSingleReview = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new CustomError.BadRequestError('Id needed');
+  }
+
+  const review = await prisma.review.findFirst({
+    where: { id: Number(id) },
+    include: { user: { select: { id: true } }, product: true },
+  });
+
+  if (!review) {
+    throw new CustomError.NotFoundError(`Review with id : ${id} not found!!`);
+  }
+
+  res.json(review);
+
   return;
 };
 
