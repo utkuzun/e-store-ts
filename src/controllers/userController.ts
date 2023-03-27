@@ -49,7 +49,8 @@ export const showCurrentUser = async (req: Request, res: Response) => {
       email: true,
       id: true,
       name: true,
-      products: { select: { name: true, id: true, description: true } },
+      products: true,
+      reviews: true,
     },
   });
 

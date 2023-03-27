@@ -11,7 +11,9 @@ import CustomError from '../errors/index';
 import cloudinary from '../utils/dataStorage';
 
 export const getlAllProducts = async (_req: Request, res: Response) => {
-  const products = await prisma.product.findMany({});
+  const products = await prisma.product.findMany({
+    include: { reviews: true },
+  });
 
   res.status(StatusCodes.OK).json(products);
   return;
@@ -20,7 +22,10 @@ export const getlAllProducts = async (_req: Request, res: Response) => {
 export const getSingleProduct = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const product = await prisma.product.findFirst({ where: { id: Number(id) } });
+  const product = await prisma.product.findFirst({
+    where: { id: Number(id) },
+    include: { reviews: true },
+  });
 
   if (!product) {
     throw new CustomError.NotFoundError(`Product with id : ${id} not found!!`);
