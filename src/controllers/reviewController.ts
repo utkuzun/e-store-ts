@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
-import { reviewValidation } from '../schemas/reviewSchema';
+import { reviewUpdate, reviewValidation } from '../schemas/reviewSchema';
 import CustomError from '../errors/index';
 
 export const createReview = async (req: Request, res: Response) => {
@@ -52,12 +52,26 @@ export const getSingleReview = async (req: Request, res: Response) => {
   return;
 };
 
-export const updateReview = (_req: Request, res: Response) => {
-  res.send('update review');
+export const updateReview = async (req: Request, res: Response) => {
+  const data = reviewUpdate.parse(req.body);
+
+  const { rating, title, comment } = data;
+
+  const { id } = req.params;
+
+  const review = await prisma.review.update({
+    where: { id: Number(id) },
+    data: { rating, title, comment },
+  });
+
+  res.status(StatusCodes.OK).json(review);
   return;
 };
 
-export const deleteReview = (_req: Request, res: Response) => {
-  res.send('delete review');
+export const deleteReview = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  await prisma.review.delete({ where: { id: Number(id) } });
+  res.status(StatusCodes.OK).end();
   return;
 };

@@ -4,6 +4,7 @@ import z from 'zod';
 import { verifyToken } from '../utils/userToken';
 import { userTokenPayload } from '../schemas/userSchema';
 import { Role } from '@prisma/client';
+import prisma from '../db/prismaClient';
 
 const authenticate = (req: Request, _res: Response, next: NextFunction) => {
   const userToken = z.string().optional().parse(req.signedCookies.userToken);
@@ -28,6 +29,28 @@ export const addPermission = (roles: Role[]) => {
 
     next();
   };
+};
+
+export const isOwner = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  const { userId, role } = req.user;
+
+  const { id } = req.params;
+
+  const review = await prisma.review.findFirst({ where: { id: Number(id) } });
+
+  if (!review) {
+    throw new CustomError.NotFoundError(`Review with id : ${id} not found!!`);
+  }
+
+  if (role !== 'ADMIN' && review?.userId !== userId) {
+    throw new CustomError.ForbiddenError('Forbidden action!!');
+  }
+
+  next();
 };
 
 export default authenticate;

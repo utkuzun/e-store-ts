@@ -7,7 +7,10 @@ import {
   getSingleReview,
   updateReview,
 } from '../controllers/reviewController';
-import authenticate, { addPermission } from '../middleware/authenticate';
+import authenticate, {
+  addPermission,
+  isOwner,
+} from '../middleware/authenticate';
 
 const router = express.Router();
 
@@ -19,7 +22,7 @@ router
 router
   .route('/:id')
   .get(getSingleReview)
-  .delete(authenticate, addPermission(['USER', 'ADMIN']), deleteReview)
-  .patch(authenticate, addPermission(['USER', 'ADMIN']), updateReview);
+  .delete(authenticate, addPermission(['USER', 'ADMIN']), isOwner, deleteReview)
+  .patch(authenticate, addPermission(['USER', 'ADMIN']), isOwner, updateReview);
 
 export default router;
