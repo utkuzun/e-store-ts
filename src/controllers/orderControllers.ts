@@ -1,4 +1,7 @@
 import { Request, RequestHandler, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import prisma from '../db/prismaClient';
+import { orderValidation } from '../schemas/orderSchema';
 
 export const getAllOrders: RequestHandler = (_req: Request, res: Response) => {
   res.send('get all orders');
@@ -18,8 +21,28 @@ export const getCurrentUserOrders: RequestHandler = (
   res.send('get current user orders');
 };
 
-export const createOrder: RequestHandler = (_req: Request, res: Response) => {
-  res.send('create orders');
+export const createOrder = async (req: Request, res: Response) => {
+  const { userId } = req.user;
+
+  const orderInput = await orderValidation.parseAsync(req.body);
+
+  const { orderItems, ...restInputs } = orderInput;
+
+  const order = await prisma.order.create({
+    data: {
+      ...restInputs,
+      orderItems: {
+        create: orderItems,
+      },
+      userId: Number(userId),
+    },
+    include: {
+      orderItems: true,
+    },
+  });
+
+  res.status(StatusCodes.CREATED).json(order);
+  return;
 };
 
 export const updateOrder: RequestHandler = (_req: Request, res: Response) => {
