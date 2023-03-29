@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
-// import prisma from '../db/prismaClient';
+import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
-import User from '../models/User';
 import { userLoginSchema, userValidationSchema } from '../schemas/userSchema';
 import { StatusCodes } from 'http-status-codes';
 import { attachCookiesToResponse, createUserPayload } from '../utils/userToken';
+import bcrypt from 'bcrypt';
 
 export const register = async (req: Request, res: Response) => {
   const userData = userValidationSchema.parse(req.body);
 
   const { email, password, name } = userData;
 
-  const userExists = await User.findFirst({
+  const userExists = await prisma.user.findFirst({
     where: { email: email },
   });
 
@@ -21,7 +21,7 @@ export const register = async (req: Request, res: Response) => {
     );
   }
 
-  const userAdded = await User.create({
+  const userAdded = await prisma.user.create({
     data: { name, password, email },
     select: { role: true, email: true, id: true, name: true },
   });
@@ -39,16 +39,15 @@ export const login = async (req: Request, res: Response) => {
     throw new CustomError.BadRequestError('Provide email and password plase!!');
   }
 
-  const userExists = await User.findFirst({
+  const userExists = await prisma.user.findFirst({
     where: { email: email },
-    select: { role: true, email: true, id: true, name: true },
   });
 
   if (!userExists) {
     throw new CustomError.NotFoundError("This user doesn't exists!!");
   }
 
-  const match = await User.verifyPassword(password, userExists.id);
+  const match = await bcrypt.compare(password, userExists.password);
 
   if (!match) {
     throw new CustomError.NotFoundError('Invalid creadentials!!');

@@ -1,14 +1,16 @@
 import { Request, Response } from 'express';
 
 import { StatusCodes } from 'http-status-codes';
+import prisma from '../db/prismaClient';
 
 import CustomError from '../errors/index';
-import User from '../models/User';
 import { userPasswordBody, userUpdateBody } from '../schemas/userSchema';
 import { createUserPayload, attachCookiesToResponse } from '../utils/userToken';
 
+import bcrypt from 'bcrypt';
+
 export const getAllUsers = async (_req: Request, res: Response) => {
-  const users = await User.findMany({
+  const users = await prisma.user.findMany({
     where: { role: 'USER' },
     select: { role: true, email: true, id: true, name: true },
   });
@@ -24,7 +26,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
     throw new CustomError.BadRequestError('Id needed!!');
   }
 
-  const user = await User.findFirst({
+  const user = await prisma.user.findFirst({
     where: {
       id: Number(id),
     },
@@ -42,7 +44,7 @@ export const getSingleUser = async (req: Request, res: Response) => {
 export const showCurrentUser = async (req: Request, res: Response) => {
   const { userId: id } = req.user;
 
-  const user = await User.findFirst({
+  const user = await prisma.user.findFirst({
     where: { id },
     select: {
       role: true,
@@ -62,11 +64,11 @@ export const updateUser = async (req: Request, res: Response) => {
   const { name, email } = userUpdateBody.parse(req.body);
   const { userId: id } = req.user;
 
-  if (!name || !email) {
+  if (!name && !email) {
     throw new CustomError.BadRequestError('Please provide name and email!!');
   }
 
-  const user = await User.update({
+  const user = await prisma.user.update({
     where: { id },
     data: { name, email },
     select: { role: true, email: true, id: true, name: true },
@@ -91,22 +93,21 @@ export const updateUserPassword = async (req: Request, res: Response) => {
     );
   }
 
-  const user = await User.findFirst({
+  const user = await prisma.user.findFirst({
     where: { id },
-    select: { role: true, email: true, id: true, name: true },
   });
 
   if (!user) {
     throw new CustomError.NotFoundError('User not found!!');
   }
 
-  const match = await User.verifyPassword(oldPassword, user.id);
+  const match = await bcrypt.compare(oldPassword, user.password);
 
   if (!match) {
     throw new CustomError.AuthenticationError('Invalid credentials');
   }
 
-  const userUpdated = await User.update({
+  const userUpdated = await prisma.user.update({
     where: { id },
     data: { password: newPassword },
     select: { role: true, email: true, id: true, name: true },

@@ -20,6 +20,8 @@ export const createReview = async (req: Request, res: Response) => {
     },
   });
 
+  await prisma.product.updateAggregates(review.product.id);
+
   res.status(StatusCodes.CREATED).json(review);
   return;
 };
@@ -64,6 +66,8 @@ export const updateReview = async (req: Request, res: Response) => {
     data: { rating, title, comment },
   });
 
+  await prisma.product.updateAggregates(review.productId);
+
   res.status(StatusCodes.OK).json(review);
   return;
 };
@@ -71,7 +75,9 @@ export const updateReview = async (req: Request, res: Response) => {
 export const deleteReview = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  await prisma.review.delete({ where: { id: Number(id) } });
+  const review = await prisma.review.delete({ where: { id: Number(id) } });
+  await prisma.product.updateAggregates(review.productId);
+
   res.status(StatusCodes.OK).end();
   return;
 };

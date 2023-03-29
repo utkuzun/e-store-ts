@@ -1,29 +1,61 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
-const prisma = new PrismaClient();
+const prismaRaw = new PrismaClient();
 
-prisma.$use(async (params, next) => {
-  if (
-    (params.action == 'create' || params.action == 'update') &&
-    params.model == 'User'
-  ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { password } = params.args.data;
+const prisma = prismaRaw.$extends({
+  model: {
+    product: {
+      async updateAggregates(productId: number) {
+        const results = await prisma.review.groupBy({
+          by: ['productId'],
+          where: {
+            productId: productId,
+          },
+          _avg: {
+            rating: true,
+          },
+        });
 
-    if (!password) {
-      return next(params);
-    }
+        await prisma.product.update({
+          where: {
+            id: productId,
+          },
+          data: {
+            averageRating: results[0]._avg.rating || 0,
+          },
+        });
+      },
+    },
+  },
+  query: {
+    user: {
+      async create({ args, query }) {
+        const { password } = args.data;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const user = params.args.data;
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
-    const saltRounds = 10;
-    const salt = await bcrypt.genSalt(saltRounds);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const hashPassword = await bcrypt.hash(user.password, salt);
-    params.args.data.password = hashPassword;
-  }
-  return next(params);
+        args.data.password = hashedPassword;
+        return query(args);
+      },
+
+      async update({ args, query }) {
+        const { password } = args.data;
+
+        if (!password) {
+          return query(args);
+        }
+
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password as string, salt);
+
+        args.data.password = hashedPassword;
+        return query(args);
+      },
+    },
+  },
 });
 
 export default prisma;
