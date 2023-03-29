@@ -16,6 +16,7 @@ model User {
   role     Role      @default(USER)
   products Product[]
   reviews Review[]
+  orders Order[]
 
   @@map("users")
 }
@@ -38,8 +39,43 @@ model Product {
   userId        Int      @map("user_id")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   reviews Review[]
+  orderItems OrderItem[]
 
   @@map("products")
+}
+
+model Order { 
+  id   Int @id @default(autoincrement())
+  tax           Int @default(0)
+  shippingFee   Int @default(0) @map("sheeping_fee")
+  subtotal      Int 
+  total         Int
+  status        OrderStatus @default(pending)
+  clientSecret  String @map("client_secret")
+  paymentIntentId String @map("payment_intent_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  userId        Int      @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  orderItems OrderItem[]
+
+}
+
+
+model OrderItem {
+  productId Int @map("product_id")
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderId Int @map("order_id")
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name String
+  image String
+  price Int
+  amount Int
+
+  @@id([productId, orderId])
+
 }
 
 model Review {
@@ -57,7 +93,13 @@ model Review {
   @@unique([productId, userId])
 }
 
-
+enum OrderStatus {
+  pending
+  cancelled
+  delivered
+  failed
+  paid
+}
 enum Category {
   office
   kitchen
