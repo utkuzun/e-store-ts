@@ -12,6 +12,8 @@ import authRouter from './routes/authRoute';
 import userRouter from './routes/userRoutes';
 import productRouter from './routes/productRoutes';
 import reviewRouter from './routes/reviewRoutes';
+import orderRouter from './routes/orderRoutes';
+
 import { JWT_SECRET } from './utils/config';
 
 const app = express();
@@ -28,6 +30,7 @@ app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/products', productRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/api/v1/orders', orderRouter);
 
 app.use(notFound);
 app.use(errorHandler);
