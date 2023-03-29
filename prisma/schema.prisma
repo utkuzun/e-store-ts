@@ -39,7 +39,7 @@ model Product {
   userId        Int      @map("user_id")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   reviews Review[]
-  orderItems OrderItem[]
+  orders OrderItem[]
 
   @@map("products")
 }
@@ -59,7 +59,7 @@ model Order {
   userId        Int      @map("user_id")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  orderItems OrderItem[]
+  products OrderItem[]
 
 }
 
