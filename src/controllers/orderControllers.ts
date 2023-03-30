@@ -1,8 +1,8 @@
-import { Request, RequestHandler, Response } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
 import CustomError from '../errors/';
-import { orderValidation } from '../schemas/orderSchema';
+import { orderUpdate, orderValidation } from '../schemas/orderSchema';
 
 export const getAllOrders = async (_req: Request, res: Response) => {
   const orders = await prisma.order.findMany({
@@ -63,11 +63,29 @@ export const getSingleOrder = async (req: Request, res: Response) => {
   return;
 };
 
-export const getCurrentUserOrders: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('get current user orders');
+export const getCurrentUserOrders = async (req: Request, res: Response) => {
+  const userOrders = await prisma.order.findMany({
+    where: {
+      userId: req.user.userId,
+    },
+    include: {
+      products: {
+        select: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          amount: true,
+        },
+      },
+    },
+  });
+
+  res.status(StatusCodes.OK).json(userOrders);
+  return;
 };
 
 export const createOrder = async (req: Request, res: Response) => {
@@ -94,6 +112,34 @@ export const createOrder = async (req: Request, res: Response) => {
   return;
 };
 
-export const updateOrder: RequestHandler = (_req: Request, res: Response) => {
-  res.send('update orders');
+export const updateOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { paymentIntentId } = orderUpdate.parse(req.body);
+
+  const orderUpdated = await prisma.order.update({
+    where: {
+      id: Number(id),
+    },
+    data: {
+      paymentIntentId,
+      status: 'paid',
+    },
+    include: {
+      products: {
+        select: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          amount: true,
+        },
+      },
+    },
+  });
+
+  res.status(StatusCodes.OK).json(orderUpdated);
+  return;
 };

@@ -61,3 +61,7 @@ export const orderValidation = z
 
     return true;
   }, 'order prices can not verified!!');
+
+export const orderUpdate = z.object({
+  paymentIntentId: z.string(),
+});
