@@ -1,17 +1,66 @@
 import { Request, RequestHandler, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
+import CustomError from '../errors/';
 import { orderValidation } from '../schemas/orderSchema';
 
-export const getAllOrders: RequestHandler = (_req: Request, res: Response) => {
-  res.send('get all orders');
+export const getAllOrders = async (_req: Request, res: Response) => {
+  const orders = await prisma.order.findMany({
+    include: {
+      products: {
+        select: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          amount: true,
+        },
+      },
+    },
+  });
+
+  res.status(StatusCodes.OK).json(orders);
+  return;
 };
 
-export const getSingleOrder: RequestHandler = (
-  _req: Request,
-  res: Response
-) => {
-  res.send('get single order');
+export const getSingleOrder = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const order = await prisma.order.findFirst({
+    where: {
+      id: Number(id),
+    },
+    include: {
+      products: {
+        select: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+            },
+          },
+          amount: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new CustomError.NotFoundError('Order not found!!');
+  }
+
+  if (order.userId !== req.user.userId) {
+    throw new CustomError.ForbiddenError(
+      'Do not have permission to see this order'
+    );
+  }
+
+  res.status(StatusCodes.CREATED).json(order);
+  return;
 };
 
 export const getCurrentUserOrders: RequestHandler = (
