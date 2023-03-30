@@ -31,13 +31,13 @@ export const createOrder = async (req: Request, res: Response) => {
   const order = await prisma.order.create({
     data: {
       ...restInputs,
-      orderItems: {
+      products: {
         create: orderItems,
       },
       userId: Number(userId),
     },
     include: {
-      orderItems: true,
+      products: true,
     },
   });
 
