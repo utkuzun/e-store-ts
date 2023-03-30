@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import prisma from '../db/prismaClient';
 import CustomError from '../errors/';
 import { orderUpdate, orderValidation } from '../schemas/orderSchema';
+import { paymentTry } from '../utils/payment';
 
 export const getAllOrders = async (_req: Request, res: Response) => {
   const orders = await prisma.order.findMany({
@@ -93,13 +94,24 @@ export const createOrder = async (req: Request, res: Response) => {
 
   const orderInput = await orderValidation.parseAsync(req.body);
 
-  const { orderItems, ...restInputs } = orderInput;
+  const { items, ...restInputs } = orderInput;
+
+  const subtotal = items.reduce((acc, curr) => {
+    acc += curr.price * curr.amount;
+    return acc;
+  }, 0);
+
+  const total = subtotal + orderInput.tax + orderInput.shippingFee;
+
+  const paymentDetails = paymentTry();
+
+  const finalInputs = { ...restInputs, ...paymentDetails, subtotal, total };
 
   const order = await prisma.order.create({
     data: {
-      ...restInputs,
+      ...finalInputs,
       products: {
-        create: orderItems,
+        create: items,
       },
       userId: Number(userId),
     },
@@ -114,6 +126,13 @@ export const createOrder = async (req: Request, res: Response) => {
 
 export const updateOrder = async (req: Request, res: Response) => {
   const { id } = req.params;
+
+  if (Number(id) !== req.user.userId) {
+    throw new CustomError.ForbiddenError(
+      'Do not have permission to update this order'
+    );
+  }
+
   const { paymentIntentId } = orderUpdate.parse(req.body);
 
   const orderUpdated = await prisma.order.update({
