@@ -59,6 +59,8 @@ export const showCurrentUser = async (req: Request, res: Response) => {
       name: true,
       products: true,
       reviews: true,
+      verified: true,
+      isVerified: true,
     },
   });
 

@@ -90,7 +90,7 @@ export const logout = (_req: Request, res: Response) => {
 };
 
 export const verifyEmail = async (req: Request, res: Response) => {
-  const { token, email } = verifyTokenValidation.parse(req.query);
+  const { token, email } = verifyTokenValidation.parse(req.body);
 
   const userToVerify = await prisma.user.findFirst({
     where: {
