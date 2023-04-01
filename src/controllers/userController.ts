@@ -12,7 +12,13 @@ import bcrypt from 'bcrypt';
 export const getAllUsers = async (_req: Request, res: Response) => {
   const users = await prisma.user.findMany({
     where: { role: 'USER' },
-    select: { role: true, email: true, id: true, name: true },
+    select: {
+      role: true,
+      email: true,
+      id: true,
+      name: true,
+      verificationToken: true,
+    },
   });
 
   res.status(StatusCodes.OK).json(users);

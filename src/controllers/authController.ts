@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import prisma from '../db/prismaClient';
 import CustomError from '../errors/index';
-import { userLoginSchema, userValidationSchema } from '../schemas/userSchema';
+import {
+  userLoginSchema,
+  userValidationSchema,
+  verifyTokenValidation,
+} from '../schemas/userSchema';
 import { StatusCodes } from 'http-status-codes';
 import { attachCookiesToResponse, createUserPayload } from '../utils/userToken';
 import bcrypt from 'bcrypt';
@@ -83,4 +87,39 @@ export const logout = (_req: Request, res: Response) => {
     .status(StatusCodes.OK)
     .end();
   return;
+};
+
+export const verifyEmail = async (req: Request, res: Response) => {
+  const { token, email } = verifyTokenValidation.parse(req.query);
+
+  const userToVerify = await prisma.user.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (!userToVerify) {
+    throw new CustomError.NotFoundError('User not found!!');
+  }
+
+  if (userToVerify.isVerified) {
+    throw new CustomError.BadRequestError('Already verified!!');
+  }
+
+  if (userToVerify.verificationToken !== token) {
+    throw new CustomError.ForbiddenError('Invalid credentials');
+  }
+
+  await prisma.user.update({
+    where: {
+      email,
+    },
+    data: {
+      verified: new Date(),
+      isVerified: true,
+      verificationToken: '',
+    },
+  });
+
+  res.send(StatusCodes.OK).end();
 };

@@ -1,12 +1,17 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import express from 'express';
-import { register, login, logout } from '../controllers/authController';
+import {
+  register,
+  login,
+  logout,
+  verifyEmail,
+} from '../controllers/authController';
 
 const router = express.Router();
 
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/register').post(register);
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
 router.route('/login').post(login);
 router.route('/logout').get(logout);
+router.route('/verify-email').patch(verifyEmail);
 
 export default router;

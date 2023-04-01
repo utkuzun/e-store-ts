@@ -31,6 +31,10 @@ export const userUpdateBody = z.object({
   email: z.string().email().optional(),
 });
 
+export const verifyTokenValidation = z.object({
+  email: z.string().email('Invalid email'),
+  token: z.string(),
+});
 export type UserValidation = z.infer<typeof userSchema>;
 export type UserPayload = z.infer<typeof userTokenPayload>;
 export type UserPublic = z.infer<typeof publicUserSchema>;
