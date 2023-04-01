@@ -6,14 +6,22 @@ import { StatusCodes } from 'http-status-codes';
 import { attachCookiesToResponse, createUserPayload } from '../utils/userToken';
 import bcrypt from 'bcrypt';
 
+import crypto from 'crypto';
+
 export const register = async (req: Request, res: Response) => {
   const userData = userValidationSchema.parse(req.body);
 
   const { email, password, name } = userData;
 
+  const isFirst = await prisma.user.count();
+
+  const role = isFirst === 0 ? 'ADMIN' : 'USER';
+
   const userExists = await prisma.user.findFirst({
     where: { email: email },
   });
+
+  const verificationToken = crypto.randomBytes(40).toString('hex');
 
   if (userExists) {
     throw new CustomError.BadRequestError(
@@ -22,11 +30,15 @@ export const register = async (req: Request, res: Response) => {
   }
 
   const userAdded = await prisma.user.create({
-    data: { name, password, email },
-    select: { role: true, email: true, id: true, name: true },
+    data: { name, password, email, role, verificationToken },
+    select: {
+      verificationToken: true,
+    },
   });
 
-  res.json(userAdded);
+  res
+    .status(StatusCodes.OK)
+    .json({ verificationToken: userAdded.verificationToken });
   return;
 };
 
@@ -51,6 +63,10 @@ export const login = async (req: Request, res: Response) => {
 
   if (!match) {
     throw new CustomError.NotFoundError('Invalid creadentials!!');
+  }
+
+  if (!userExists.isVerified) {
+    throw new CustomError.AuthenticationError('verify your email!!');
   }
 
   const userPayload = createUserPayload(userExists);

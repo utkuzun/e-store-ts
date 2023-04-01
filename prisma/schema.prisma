@@ -17,6 +17,9 @@ model User {
   products Product[]
   reviews Review[]
   orders Order[]
+  isVerified Boolean @default(false) @map("is_verified")
+  verified DateTime?
+  verificationToken String @default("token shitted") @map("verification_token")
 
   @@map("users")
 }

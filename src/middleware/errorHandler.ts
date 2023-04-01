@@ -18,6 +18,8 @@ const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     statusCode: 500,
   };
 
+  console.log(err);
+
   if (err instanceof BadRequestError) {
     customError.message = err.message;
     customError.statusCode = err.statusCode;
