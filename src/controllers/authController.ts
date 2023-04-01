@@ -11,6 +11,7 @@ import { attachCookiesToResponse, createUserPayload } from '../utils/userToken';
 import bcrypt from 'bcrypt';
 
 import crypto from 'crypto';
+import { verificationEmail } from '../utils/mailer';
 
 export const register = async (req: Request, res: Response) => {
   const userData = userValidationSchema.parse(req.body);
@@ -25,24 +26,30 @@ export const register = async (req: Request, res: Response) => {
     where: { email: email },
   });
 
-  const verificationToken = crypto.randomBytes(40).toString('hex');
-
   if (userExists) {
     throw new CustomError.BadRequestError(
       `${userExists.email} already exists!!`
     );
   }
 
+  const verificationToken = crypto.randomBytes(40).toString('hex');
+
   const userAdded = await prisma.user.create({
     data: { name, password, email, role, verificationToken },
     select: {
       verificationToken: true,
+      name: true,
     },
   });
 
-  res
-    .status(StatusCodes.OK)
-    .json({ verificationToken: userAdded.verificationToken });
+  await verificationEmail(
+    userAdded.verificationToken,
+    email,
+    'http://localhost:5000',
+    userAdded.name
+  );
+
+  res.status(StatusCodes.OK).end();
   return;
 };
 

@@ -14,7 +14,7 @@ interface CustomError {
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   const customError: CustomError = {
-    message: 'Internal Server Error',
+    message: 'Internal Server Error' + err?.message,
     statusCode: 500,
   };
 
