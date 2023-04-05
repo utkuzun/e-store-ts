@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { Response } from 'express';
 
 import { UserPayload, UserPublic } from '../schemas/userSchema';
-import { JWT_LIFETIME, JWT_SECRET } from '../utils/config';
+import { JWT_SECRET } from '../utils/config';
 import CustomError from '../errors/';
 
 export const createUserPayload = (user: UserPublic): UserPayload => {
@@ -16,7 +16,7 @@ export const createUserPayload = (user: UserPublic): UserPayload => {
 export const createToken = (payload: object) => {
   if (!JWT_SECRET) throw new Error('Login not working!!');
 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_LIFETIME });
+  const token = jwt.sign(payload, JWT_SECRET);
 
   return token;
 };
@@ -35,12 +35,28 @@ export const verifyToken = (token: string) => {
   return payload;
 };
 
-export const attachCookiesToResponse = (res: Response, payload: object) => {
-  const token = createToken(payload);
-  res.cookie('userToken', token, {
-    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+interface CookieInput {
+  res: Response;
+  userPayload: object;
+  refreshToken: string;
+}
+
+export const attachCookiesToResponse = ({
+  res,
+  userPayload,
+  refreshToken,
+}: CookieInput) => {
+  const accessTokenJWT = createToken(userPayload);
+  const refreshTokenJWT = createToken({ ...userPayload, refreshToken });
+  res.cookie('accessToken', accessTokenJWT, {
+    maxAge: 60 * 1000,
     httpOnly: true,
     signed: true,
+  });
+  res.cookie('refreshToken', refreshTokenJWT, {
+    httpOnly: true,
+    signed: true,
+    expires: new Date(Date.now() + 15 * 60 * 1000),
   });
 
   return;

@@ -21,7 +21,24 @@ model User {
   verified DateTime?
   verificationToken String @default("token shitted") @map("verification_token")
 
+  token Token?
+
   @@map("users")
+}
+
+
+model Token {
+  id Int @id @default(autoincrement())
+  refreshToken String @map("refresh_token")
+  ip String
+  userAgent String @map("user_agent")
+  isValid Boolean @default(true) @map("is_valid")
+
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  userId        Int      @unique @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Product {

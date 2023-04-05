@@ -5,7 +5,7 @@ import prisma from '../db/prismaClient';
 
 import CustomError from '../errors/index';
 import { userPasswordBody, userUpdateBody } from '../schemas/userSchema';
-import { createUserPayload, attachCookiesToResponse } from '../utils/userToken';
+// import { createUserPayload, attachCookiesToResponse } from '../utils/userToken';
 
 import bcrypt from 'bcrypt';
 
@@ -76,15 +76,14 @@ export const updateUser = async (req: Request, res: Response) => {
     throw new CustomError.BadRequestError('Please provide name and email!!');
   }
 
-  const user = await prisma.user.update({
+  await prisma.user.update({
     where: { id },
     data: { name, email },
     select: { role: true, email: true, id: true, name: true },
   });
 
-  const userPayload = createUserPayload(user);
-
-  attachCookiesToResponse(res, userPayload);
+  // const userPayload = createUserPayload(user);
+  // attachCookiesToResponse(res, userPayload);
 
   res.status(StatusCodes.OK).end();
   return;

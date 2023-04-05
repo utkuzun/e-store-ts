@@ -82,7 +82,17 @@ export const login = async (req: Request, res: Response) => {
 
   const userPayload = createUserPayload(userExists);
 
-  attachCookiesToResponse(res, userPayload);
+  let refreshToken = '';
+
+  refreshToken = crypto.randomBytes(40).toString('hex');
+  const ip = req.ip;
+  const userAgent = req.headers['user-agent'] || 'default user agent';
+
+  await prisma.token.create({
+    data: { refreshToken, ip, userAgent, userId: userExists.id },
+  });
+
+  attachCookiesToResponse({ res, userPayload, refreshToken });
 
   res.status(StatusCodes.OK).end();
   return;
